@@ -24,7 +24,7 @@ impl Application for App {
     fn new(_flags: ()) -> (Self, Command<Message>) {
         (
             Self {
-                background: ChessBoardBackground::new(200u16),
+                background: ChessBoardBackground::new(400u16),
             },
             Command::none(),
         )
