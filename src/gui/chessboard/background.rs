@@ -1,6 +1,6 @@
 use iced::widget::canvas::{self, Cursor, Event, Geometry};
 use iced::widget::canvas::{Cache, Canvas, Path, Text};
-use iced::{event, mouse, Color, Element, Length, Point, Rectangle, Size, Theme, Font};
+use iced::{event, mouse, Color, Element, Font, Length, Point, Rectangle, Size, Theme};
 
 #[derive(Debug, Clone)]
 pub enum Message {}
@@ -14,19 +14,23 @@ pub enum Interaction {
 pub struct ChessBoardBackground {
     size: u16,
     white_cell_color: Color,
+    white_turn: bool,
     black_cell_color: Color,
     cells_cache: Cache,
     text_cache: Cache,
+    turn_cache: Cache,
 }
 
 impl ChessBoardBackground {
     pub fn new(size: u16) -> Self {
         Self {
             size,
+            white_turn: true,
             white_cell_color: Color::from_rgb8(0xFF, 0xDE, 0xAD),
             black_cell_color: Color::from_rgb8(0xCD, 0x85, 0x3F),
             cells_cache: Cache::default(),
             text_cache: Cache::default(),
+            turn_cache: Cache::default(),
         }
     }
 
@@ -65,10 +69,7 @@ impl canvas::Program<Message> for ChessBoardBackground {
                 height: size,
             },
             |frame| {
-                let background = Path::rectangle(
-                    Point::new(0f32, 0f32),
-                    frame.size(),
-                );
+                let background = Path::rectangle(Point::new(0f32, 0f32), frame.size());
                 frame.fill(&background, Color::from_rgb8(0x00, 0x80, 0xFF));
 
                 (0..8).for_each(|row| {
@@ -162,7 +163,20 @@ impl canvas::Program<Message> for ChessBoardBackground {
                 });
             },
         );
-        vec![cells, texts]
+
+        let player_turn = self.turn_cache.draw(
+            Size {
+                width: size,
+                height: size,
+            },
+            |frame| {
+                let cells_size = (self.size as f32) * 0.111;
+                let location = cells_size * 8.75;
+                let circle = Path::circle(Point::new(location, location), cells_size * 0.25);
+                frame.fill(&circle, if self.white_turn {Color::WHITE} else {Color::BLACK});
+            },
+        );
+        vec![cells, texts, player_turn]
     }
 
     fn mouse_interaction(

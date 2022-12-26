@@ -9,3 +9,4 @@ edition = "2021"
 iced = { version = "0.6.0", features = ["svg", "canvas"] }
 iced_lazy = "0.3.0"
 iced_native = "0.7.0"
+pleco = "0.5.0"
