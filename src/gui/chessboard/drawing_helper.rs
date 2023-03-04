@@ -72,7 +72,7 @@ where
         files.into_iter().enumerate().for_each(|(col, file_str)| {
             let cells_size = (board.size as f32) * 0.111;
             let font_size = cells_size * 0.4;
-            let x = cells_size * (col as f32 + 1.0) + bounds.x;
+            let x = cells_size * ((if board.reversed {7-col} else {col}) as f32 + 1.0) + bounds.x;
             let y1 = cells_size * 0.25 + bounds.y;
             let y2 = cells_size * 8.75 + bounds.y;
 
@@ -114,7 +114,7 @@ where
             let font_size = cells_size * 0.4;
             let x1 = cells_size * 0.25 + bounds.x;
             let x2 = cells_size * 8.75 + bounds.x;
-            let y = cells_size * (row as f32 + 1.0) + bounds.y;
+            let y = cells_size * (if board.reversed {7-row} else {row} as f32 + 1.0) + bounds.y;
 
             let text1 = Text {
                 content: rank_str.into(),
@@ -183,14 +183,14 @@ where
                 let file = col;
                 let rank = 7 - row;
                 let pleco_file = DrawingHelper::<Renderer>::coord_file_to_pleco_file(file);
-                let pleco_rank = DrawingHelper::<Renderer>::coord_rank_to_pleco_rank(7-rank);
+                let pleco_rank = DrawingHelper::<Renderer>::coord_rank_to_pleco_rank(rank);
                 let piece = board.logic.piece_at_sq(SQ::make(pleco_file, pleco_rank));
                 let piece_image_handle =
                     DrawingHelper::<Renderer>::pleco_piece_to_image_handle(board, piece);
                 if piece_image_handle.is_some() {
                     let cell_bounds = Rectangle {
-                        x: cells_size * (0.5f32 + file as f32) + bounds.x,
-                        y: cells_size * (0.5f32 + rank as f32) + bounds.y,
+                        x: cells_size * (if board.reversed {7.5f32 - file as f32} else  {0.5f32 + file as f32}) + bounds.x,
+                        y: cells_size * (if board.reversed {0.5f32 + rank as f32} else {7.5f32 - rank as f32}) + bounds.y,
                         width: cells_size,
                         height: cells_size,
                     };

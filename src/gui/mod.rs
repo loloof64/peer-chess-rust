@@ -2,13 +2,13 @@ mod chessboard;
 use chessboard::ChessBoard;
 
 use iced::theme::Theme;
-use iced::widget::container;
+use iced::widget::{container, column, button};
 use iced::Element;
 use iced::{Length, Sandbox};
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    None,
+    ToggleBoardOrientation,
 }
 
 pub struct App {
@@ -30,13 +30,16 @@ impl Sandbox for App {
 
     fn update(&mut self, message: Message) {
         match message {
-            Message::None => println!("Button clicked !"),
+            Message::ToggleBoardOrientation => self.board.toggle_orientation(),
         }
     }
 
     fn view(&self) -> Element<Message> {
         container(
-            self.board.clone(),
+            column![
+                button("Turn board").on_press(Message::ToggleBoardOrientation),
+                self.board.clone(),
+            ]
         )
         .width(Length::Fill)
         .height(Length::Fill)

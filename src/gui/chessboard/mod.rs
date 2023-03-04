@@ -28,6 +28,7 @@ pub struct ChessBoard {
     svg_bq: Handle,
     svg_bk: Handle,
     logic: Board,
+    reversed: bool,
 }
 
 impl ChessBoard {
@@ -99,7 +100,12 @@ impl ChessBoard {
             svg_bq,
             svg_bk,
             logic: Board::default(),
+            reversed: false,
         }
+    }
+
+    pub fn toggle_orientation(&mut self) {
+        self.reversed = ! self.reversed;
     }
 }
 
