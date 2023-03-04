@@ -1,37 +1,113 @@
-use std::marker::PhantomData;
+mod drawing_helper;
+use drawing_helper::DrawingHelper;
 
 use iced::{Color, Element, Font, Length, Point, Rectangle, Size};
 
-use iced_native::renderer::BorderRadius;
-use iced_native::text::Text;
-use iced_native::{layout, renderer, text, Widget};
+use iced_native::svg::Handle;
+use iced_native::{layout, renderer, svg, text, Widget};
 
-#[derive(Clone, Copy)]
+use pleco::Board;
+
+#[derive(Clone)]
 pub struct ChessBoard {
     size: u16,
     background_color: Color,
     white_cell_color: Color,
     black_cell_color: Color,
     text_color: Color,
+    svg_wp: Handle,
+    svg_wn: Handle,
+    svg_wb: Handle,
+    svg_wr: Handle,
+    svg_wq: Handle,
+    svg_wk: Handle,
+    svg_bp: Handle,
+    svg_bn: Handle,
+    svg_bb: Handle,
+    svg_br: Handle,
+    svg_bq: Handle,
+    svg_bk: Handle,
     white_turn: bool,
+    logic: Board,
 }
 
 impl ChessBoard {
     pub fn new(size: u16) -> Self {
+        let svg_wp = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_plt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_wn = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_nlt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_wb = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_blt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_wr = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_rlt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_wq = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_qlt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_wk = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_klt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_bp = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_pdt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_bn = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_ndt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_bb = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_bdt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_br = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_rdt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_bq = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_qdt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let svg_bk = svg::Handle::from_path(format!(
+            "{}/resources/chess_vectors/Chess_kdt45.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
         Self {
             size,
             background_color: Color::from_rgb8(0x15, 0x88, 0xC4),
             white_cell_color: Color::from_rgb8(0xFF, 0xDE, 0xAD),
             black_cell_color: Color::from_rgb8(0xCD, 0x85, 0x3F),
             text_color: Color::from_rgb8(0xFF, 0xFF, 0x00),
+            svg_wp,
+            svg_wn,
+            svg_wb,
+            svg_wr,
+            svg_wq,
+            svg_wk,
+            svg_bp,
+            svg_bn,
+            svg_bb,
+            svg_br,
+            svg_bq,
+            svg_bk,
             white_turn: true,
+            logic: Board::default(),
         }
     }
 }
 
 impl<Message, Renderer> Widget<Message, Renderer> for ChessBoard
 where
-    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
+    Renderer: renderer::Renderer + text::Renderer<Font = Font> + svg::Renderer,
 {
     fn width(&self) -> Length {
         Length::Fixed(self.size as f32)
@@ -65,180 +141,15 @@ where
         DrawingHelper::draw_cells(self, renderer, bounds);
         DrawingHelper::draw_coordinates(self, renderer, bounds);
         DrawingHelper::draw_player_turn(self, renderer, bounds);
-        
+        DrawingHelper::draw_pieces(self, renderer, bounds);
     }
 }
 
 impl<'a, Message, Renderer> From<ChessBoard> for Element<'a, Message, Renderer>
 where
-    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
+    Renderer: renderer::Renderer + text::Renderer<Font = Font> + svg::Renderer,
 {
     fn from(board: ChessBoard) -> Self {
         Self::new(board)
-    }
-}
-
-struct DrawingHelper<Renderer>
-where
-    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
-{
-    _renderer: PhantomData<Renderer>,
-}
-
-impl<Renderer> DrawingHelper<Renderer>
-where
-    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
-{
-    fn draw_background(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
-        renderer.fill_quad(
-            renderer::Quad {
-                bounds,
-                border_color: Color::TRANSPARENT,
-                border_width: 0f32,
-                border_radius: BorderRadius::default(),
-            },
-            board.background_color,
-        );
-    }
-
-    fn draw_cells(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
-        let cells_size = (board.size as f32) * 0.111;
-        (0..8).for_each(|row| {
-            (0..8).for_each(|col| {
-                let is_white_cell = (row + col) % 2 == 0;
-                let cell_color = if is_white_cell {
-                    board.white_cell_color
-                } else {
-                    board.black_cell_color
-                };
-                let x = cells_size * (col as f32 + 0.5) + bounds.x;
-                let y = cells_size * (row as f32 + 0.5) + bounds.y;
-
-                renderer.fill_quad(
-                    renderer::Quad {
-                        bounds: Rectangle {
-                            x,
-                            y,
-                            width: cells_size,
-                            height: cells_size,
-                        },
-                        border_radius: BorderRadius::default(),
-                        border_width: 0f32,
-                        border_color: Color::TRANSPARENT,
-                    },
-                    cell_color,
-                );
-            });
-        });
-    }
-
-    fn draw_coordinates(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
-        let files = vec!["A", "B", "C", "D", "E", "F", "G", "H"];
-        let ranks = vec!["8", "7", "6", "5", "4", "3", "2", "1"];
-
-        files.into_iter().enumerate().for_each(|(col, file)| {
-            let cells_size = (board.size as f32) * 0.111;
-            let font_size = cells_size * 0.4;
-            let x = cells_size * (col as f32 + 1.0) + bounds.x;
-            let y1 = cells_size * 0.25 + bounds.y;
-            let y2 = cells_size * 8.75 + bounds.y;
-
-            let text1 = Text {
-                content: file.into(),
-                bounds: Rectangle {
-                    x,
-                    y: y1,
-                    width: font_size,
-                    height: font_size,
-                },
-                color: board.text_color,
-                size: font_size,
-                font: Font::default(),
-                horizontal_alignment: iced::alignment::Horizontal::Center,
-                vertical_alignment: iced::alignment::Vertical::Center,
-            };
-            renderer.fill_text(text1);
-
-            let text2 = Text {
-                content: file.into(),
-                bounds: Rectangle {
-                    x,
-                    y: y2,
-                    width: font_size,
-                    height: font_size,
-                },
-                color: board.text_color,
-                size: font_size,
-                font: Font::default(),
-                horizontal_alignment: iced::alignment::Horizontal::Center,
-                vertical_alignment: iced::alignment::Vertical::Center,
-            };
-            renderer.fill_text(text2);
-        });
-
-        ranks.into_iter().enumerate().for_each(|(row, rank)| {
-            let cells_size = (board.size as f32) * 0.111;
-            let font_size = cells_size * 0.4;
-            let x1 = cells_size * 0.25 + bounds.x;
-            let x2 = cells_size * 8.75 + bounds.x;
-            let y = cells_size * (row as f32 + 1.0) + bounds.y;
-
-            let text1 = Text {
-                content: rank.into(),
-                bounds: Rectangle {
-                    x: x1,
-                    y: y,
-                    width: font_size,
-                    height: font_size,
-                },
-                color: board.text_color,
-                size: font_size,
-                font: Font::default(),
-                horizontal_alignment: iced::alignment::Horizontal::Center,
-                vertical_alignment: iced::alignment::Vertical::Center,
-            };
-            renderer.fill_text(text1);
-
-            let text2 = Text {
-                content: rank.into(),
-                bounds: Rectangle {
-                    x: x2,
-                    y,
-                    width: font_size,
-                    height: font_size,
-                },
-                color: board.text_color,
-                size: font_size,
-                font: Font::default(),
-                horizontal_alignment: iced::alignment::Horizontal::Center,
-                vertical_alignment: iced::alignment::Vertical::Center,
-            };
-            renderer.fill_text(text2);
-        });
-    }
-
-    fn draw_player_turn(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
-        let cells_size = (board.size as f32) * 0.111;
-        let x = cells_size * 8.5 + bounds.x;
-        let y = cells_size * 8.5 + bounds.y;
-        let color = if board.white_turn {
-            Color::WHITE
-        } else {
-            Color::BLACK
-        };
-        renderer.fill_quad(
-            renderer::Quad {
-                bounds: Rectangle {
-                    x,
-                    y,
-                    width: cells_size * 0.5f32,
-                    height: cells_size * 0.5f32,
-                },
-                border_radius: BorderRadius::from(cells_size * 0.5f32),
-                border_width: 0f32,
-                border_color: Color::TRANSPARENT,
-            },
-            color,
-        );
     }
 }

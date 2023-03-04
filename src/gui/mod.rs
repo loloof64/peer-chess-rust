@@ -36,7 +36,7 @@ impl Sandbox for App {
 
     fn view(&self) -> Element<Message> {
         container(
-            self.board,
+            self.board.clone(),
         )
         .width(Length::Fill)
         .height(Length::Fill)
