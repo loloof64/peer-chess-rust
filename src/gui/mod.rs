@@ -25,7 +25,7 @@ impl Sandbox for App {
     }
 
     fn title(&self) -> String {
-        String::from("Iced chess experiment")
+        String::from("Peer chess")
     }
 
     fn update(&mut self, message: Message) {
