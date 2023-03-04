@@ -1,0 +1,1 @@
+These vectors have been downloaded at [https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces](Wikimedia Commons) and designed by CBurnett.

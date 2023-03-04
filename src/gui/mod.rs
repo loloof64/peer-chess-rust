@@ -1,10 +1,10 @@
 mod chessboard;
+use chessboard::ChessBoard;
 
-use chessboard::ChessBoardBackground;
 use iced::theme::Theme;
-use iced::widget::{container};
-use iced::{executor, Command, Length};
-use iced::{Application, Element};
+use iced::widget::container;
+use iced::Element;
+use iced::{Length, Sandbox};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -12,45 +12,40 @@ pub enum Message {
 }
 
 pub struct App {
-    background: ChessBoardBackground,
+    board: ChessBoard,
 }
 
-impl Application for App {
+impl Sandbox for App {
     type Message = Message;
-    type Theme = Theme;
-    type Executor = executor::Default;
-    type Flags = ();
 
-    fn new(_flags: ()) -> (Self, Command<Message>) {
-        (
-            Self {
-                background: ChessBoardBackground::new(400u16),
-            },
-            Command::none(),
-        )
+    fn new() -> Self {
+        Self {
+            board: ChessBoard::new(400u16),
+        }
     }
 
     fn title(&self) -> String {
         String::from("Iced chess experiment")
     }
 
-    fn update(&mut self, _message: Message) -> Command<Message> {
-        Command::none()
+    fn update(&mut self, message: Message) {
+        match message {
+            Message::None => println!("Button clicked !"),
+        }
     }
 
     fn view(&self) -> Element<Message> {
-        let bg1 = self.background.view().map(move |_message| Message::None);
-        let content = bg1;
-
-        container(content)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .center_x()
-            .center_y()
-            .into()
+        container(
+            self.board,
+        )
+        .width(Length::Fill)
+        .height(Length::Fill)
+        .center_x()
+        .center_y()
+        .into()
     }
 
     fn theme(&self) -> Theme {
-        Theme::Dark
+        Theme::Light
     }
 }
