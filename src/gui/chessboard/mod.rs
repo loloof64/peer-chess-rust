@@ -34,51 +34,51 @@ pub struct ChessBoard {
 impl ChessBoard {
     pub fn new(size: u16) -> Self {
         let svg_wp = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_plt45.svg",
+            "{}/resources/images/chess_vectors/Chess_plt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_wn = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_nlt45.svg",
+            "{}/resources/images/chess_vectors/Chess_nlt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_wb = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_blt45.svg",
+            "{}/resources/images/chess_vectors/Chess_blt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_wr = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_rlt45.svg",
+            "{}/resources/images/chess_vectors/Chess_rlt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_wq = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_qlt45.svg",
+            "{}/resources/images/chess_vectors/Chess_qlt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_wk = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_klt45.svg",
+            "{}/resources/images/chess_vectors/Chess_klt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_bp = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_pdt45.svg",
+            "{}/resources/images/chess_vectors/Chess_pdt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_bn = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_ndt45.svg",
+            "{}/resources/images/chess_vectors/Chess_ndt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_bb = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_bdt45.svg",
+            "{}/resources/images/chess_vectors/Chess_bdt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_br = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_rdt45.svg",
+            "{}/resources/images/chess_vectors/Chess_rdt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_bq = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_qdt45.svg",
+            "{}/resources/images/chess_vectors/Chess_qdt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         let svg_bk = svg::Handle::from_path(format!(
-            "{}/resources/chess_vectors/Chess_kdt45.svg",
+            "{}/resources/images/chess_vectors/Chess_kdt45.svg",
             env!("CARGO_MANIFEST_DIR")
         ));
         Self {

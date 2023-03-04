@@ -2,7 +2,8 @@ mod chessboard;
 use chessboard::ChessBoard;
 
 use iced::theme::Theme;
-use iced::widget::{container, column, button};
+use iced::widget::{button, container, svg, Column};
+use iced::Alignment;
 use iced::Element;
 use iced::{Length, Sandbox};
 
@@ -35,11 +36,24 @@ impl Sandbox for App {
     }
 
     fn view(&self) -> Element<Message> {
+        let toggle_board_handle = svg::Handle::from_path(format!(
+            "{}/resources/images/swap_vertical.svg",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let toggle_board_image = svg(toggle_board_handle)
+            .width(Length::Fill)
+            .height(Length::Fill);
         container(
-            column![
-                button("Turn board").on_press(Message::ToggleBoardOrientation),
-                self.board.clone(),
-            ]
+            Column::new()
+                .align_items(Alignment::Center)
+                .spacing(5)
+                .push(
+                    button(toggle_board_image)
+                        .width(40)
+                        .height(40)
+                        .on_press(Message::ToggleBoardOrientation),
+                )
+                .push(self.board.clone()),
         )
         .width(Length::Fill)
         .height(Length::Fill)
