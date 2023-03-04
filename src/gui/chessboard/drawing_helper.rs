@@ -9,7 +9,7 @@ use iced_native::svg::Handle;
 use iced_native::text::Text;
 use iced_native::{ renderer, svg, text};
 
-use pleco::{ File, Piece, Rank, SQ};
+use pleco::{ File, Piece, Rank, SQ, Player};
 
 pub struct DrawingHelper<Renderer>
 where
@@ -154,7 +154,7 @@ where
         let cells_size = (board.size as f32) * 0.111;
         let x = cells_size * 8.5 + bounds.x;
         let y = cells_size * 8.5 + bounds.y;
-        let color = if board.white_turn {
+        let color = if board.logic.turn() == Player::White {
             Color::WHITE
         } else {
             Color::BLACK

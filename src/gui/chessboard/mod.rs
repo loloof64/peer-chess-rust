@@ -27,7 +27,6 @@ pub struct ChessBoard {
     svg_br: Handle,
     svg_bq: Handle,
     svg_bk: Handle,
-    white_turn: bool,
     logic: Board,
 }
 
@@ -99,7 +98,6 @@ impl ChessBoard {
             svg_br,
             svg_bq,
             svg_bk,
-            white_turn: true,
             logic: Board::default(),
         }
     }
