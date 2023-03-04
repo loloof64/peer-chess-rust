@@ -7,9 +7,9 @@ use iced_native::{layout, renderer, Widget};
 pub struct ChessBoard {
     size: u16,
     background_color: Color,
-    /*white_cell_color: Color,
-    white_turn: bool,
-    black_cell_color: Color,*/
+    white_cell_color: Color,
+    black_cell_color: Color,
+    //white_turn: bool,
 }
 
 impl ChessBoard {
@@ -17,9 +17,9 @@ impl ChessBoard {
         Self {
             size,
             background_color: Color::from_rgb8(0x15, 0x88, 0xC4),
-            /*white_turn: true,
             white_cell_color: Color::from_rgb8(0xFF, 0xDE, 0xAD),
-            black_cell_color: Color::from_rgb8(0xCD, 0x85, 0x3F),*/
+            black_cell_color: Color::from_rgb8(0xCD, 0x85, 0x3F),
+            //white_turn: true,
         }
     }
 }
@@ -54,15 +54,48 @@ where
         _cursor_position: Point,
         _viewport: &Rectangle,
     ) {
+        let cells_size = (self.size as f32) * 0.111;
+        let bounds = layout.bounds();
+
+        // draw background
         renderer.fill_quad(
             renderer::Quad {
-                bounds: layout.bounds(),
+                bounds,
                 border_color: Color::TRANSPARENT,
-                border_width: 0.0,
+                border_width: 0f32,
                 border_radius: BorderRadius::default(),
             },
             self.background_color,
-        )
+        );
+
+        // draw cells
+        (0..8).for_each(|row| {
+            (0..8).for_each(|col| {
+                let is_white_cell = (row + col) % 2 == 0;
+                let cell_color = if is_white_cell {
+                    self.white_cell_color
+                } else {
+                    self.black_cell_color
+                };
+                let x = cells_size * (col as f32 + 0.5) + bounds.x;
+                let y = cells_size * (row as f32 + 0.5) + bounds.y;
+
+                renderer.fill_quad(
+                    renderer::Quad {
+                        bounds: Rectangle {
+                            x,
+                            y,
+                            width: cells_size,
+                            height: cells_size,
+                        },
+                        border_radius: BorderRadius::default(),
+                        border_width: 0f32,
+                        border_color: Color::TRANSPARENT,
+                    },
+                    cell_color,
+                );
+            });
+        });
     }
 }
 
