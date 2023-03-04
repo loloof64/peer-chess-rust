@@ -1,7 +1,8 @@
-use iced::{Color, Element, Length, Point, Rectangle, Size};
+use iced::{Color, Element, Length, Point, Rectangle, Size, Font};
 
 use iced_native::renderer::BorderRadius;
-use iced_native::{layout, renderer, Widget};
+use iced_native::text::Text;
+use iced_native::{layout, renderer, text, Widget};
 
 #[derive(Clone, Copy)]
 pub struct ChessBoard {
@@ -9,6 +10,7 @@ pub struct ChessBoard {
     background_color: Color,
     white_cell_color: Color,
     black_cell_color: Color,
+    text_color: Color,
     //white_turn: bool,
 }
 
@@ -19,6 +21,7 @@ impl ChessBoard {
             background_color: Color::from_rgb8(0x15, 0x88, 0xC4),
             white_cell_color: Color::from_rgb8(0xFF, 0xDE, 0xAD),
             black_cell_color: Color::from_rgb8(0xCD, 0x85, 0x3F),
+            text_color: Color::from_rgb8(0xFF, 0xFF, 0x00),
             //white_turn: true,
         }
     }
@@ -26,7 +29,7 @@ impl ChessBoard {
 
 impl<Message, Renderer> Widget<Message, Renderer> for ChessBoard
 where
-    Renderer: renderer::Renderer,
+    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
 {
     fn width(&self) -> Length {
         Length::Fixed(self.size as f32)
@@ -56,6 +59,9 @@ where
     ) {
         let cells_size = (self.size as f32) * 0.111;
         let bounds = layout.bounds();
+
+        let files = vec!["A", "B", "C", "D", "E", "F", "G", "H"];
+        let ranks = vec!["8", "7", "6", "5", "4", "3", "2", "1"];
 
         // draw background
         renderer.fill_quad(
@@ -96,12 +102,73 @@ where
                 );
             });
         });
+
+        // draw coordinates
+        files.into_iter().enumerate().for_each(|(col, file)| {
+            let cells_size = (self.size as f32) * 0.111;
+            let font_size = cells_size * 0.4;
+            let x = cells_size * (col as f32 + 1.0) + bounds.x;
+            let y1 = cells_size * 0.25 + bounds.y;
+            let y2 = cells_size * 8.75 + bounds.y;
+
+            let text1 = Text {
+                content: file.into(),
+                bounds: Rectangle { x, y: y1, width: font_size, height: font_size },
+                color: self.text_color,
+                size: font_size,
+                font: Font::default(),
+                horizontal_alignment: iced::alignment::Horizontal::Center,
+                vertical_alignment: iced::alignment::Vertical::Center,
+            };
+            renderer.fill_text(text1);
+
+            let text2 = Text {
+                content: file.into(),
+                bounds: Rectangle { x, y: y2, width: font_size, height: font_size },
+                color: self.text_color,
+                size: font_size,
+                font: Font::default(),
+                horizontal_alignment: iced::alignment::Horizontal::Center,
+                vertical_alignment: iced::alignment::Vertical::Center,
+            };
+            renderer.fill_text(text2);
+        });
+
+        ranks.into_iter().enumerate().for_each(|(row, rank)| {
+            let cells_size = (self.size as f32) * 0.111;
+            let font_size = cells_size * 0.4;
+            let x1 = cells_size * 0.25 + bounds.x;
+            let x2 = cells_size * 8.75 + bounds.x;
+            let y = cells_size * (row as f32 + 1.0) + bounds.y;
+
+            let text1 = Text {
+                content: rank.into(),
+                bounds: Rectangle { x: x1, y: y, width: font_size, height: font_size },
+                color: self.text_color,
+                size: font_size,
+                font: Font::default(),
+                horizontal_alignment: iced::alignment::Horizontal::Center,
+                vertical_alignment: iced::alignment::Vertical::Center,
+            };
+            renderer.fill_text(text1);
+
+            let text2 = Text {
+                content: rank.into(),
+                bounds: Rectangle { x: x2, y, width: font_size, height: font_size },
+                color: self.text_color,
+                size: font_size,
+                font: Font::default(),
+                horizontal_alignment: iced::alignment::Horizontal::Center,
+                vertical_alignment: iced::alignment::Vertical::Center,
+            };
+            renderer.fill_text(text2);
+        });
     }
 }
 
 impl<'a, Message, Renderer> From<ChessBoard> for Element<'a, Message, Renderer>
 where
-    Renderer: renderer::Renderer,
+    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
 {
     fn from(board: ChessBoard) -> Self {
         Self::new(board)
@@ -109,108 +176,6 @@ where
 }
 
 /*
-        let size = self.size as f32;
-        let cells = self.cells_cache.draw(
-            Size {
-                width: size,
-                height: size,
-            },
-            |frame| {
-                let background = Path::rectangle(Point::new(0f32, 0f32), frame.size());
-                frame.fill(&background, Color::from_rgb8(0x00, 0x80, 0xFF));
-
-                (0..8).for_each(|row| {
-                    (0..8).for_each(|col| {
-                        let cells_size = (self.size as f32) * 0.111;
-                        let is_white_cell = (row + col) % 2 == 0;
-                        let cell_color = if is_white_cell {
-                            self.white_cell_color
-                        } else {
-                            self.black_cell_color
-                        };
-                        let x = cells_size * (col as f32 + 0.5);
-                        let y = cells_size * (row as f32 + 0.5);
-
-                        let bounds =
-                            Path::rectangle(Point::new(x, y), Size::new(cells_size, cells_size));
-                        frame.fill(&bounds, cell_color);
-                    });
-                });
-            },
-        );
-        let texts = self.text_cache.draw(
-            Size {
-                width: size,
-                height: size,
-            },
-            |frame| {
-                let files = vec!["A", "B", "C", "D", "E", "F", "G", "H"];
-                let ranks = vec!["8", "7", "6", "5", "4", "3", "2", "1"];
-
-                let color = Color::from_rgb8(0xFF, 0xFF, 0x00);
-
-                files.into_iter().enumerate().for_each(|(col, file)| {
-                    let cells_size = (self.size as f32) * 0.111;
-                    let font_size = cells_size * 0.4;
-                    let x = cells_size * (col as f32 + 1.0);
-                    let y1 = cells_size * 0.25;
-                    let y2 = cells_size * 8.75;
-
-                    let text1 = Text {
-                        content: file.into(),
-                        position: Point::new(x, y1),
-                        color,
-                        size: font_size,
-                        font: Font::default(),
-                        horizontal_alignment: iced::alignment::Horizontal::Center,
-                        vertical_alignment: iced::alignment::Vertical::Center,
-                    };
-                    frame.fill_text(text1);
-
-                    let text2 = Text {
-                        content: file.into(),
-                        position: Point::new(x, y2),
-                        color,
-                        size: font_size,
-                        font: Font::default(),
-                        horizontal_alignment: iced::alignment::Horizontal::Center,
-                        vertical_alignment: iced::alignment::Vertical::Center,
-                    };
-                    frame.fill_text(text2);
-                });
-
-                ranks.into_iter().enumerate().for_each(|(row, rank)| {
-                    let cells_size = (self.size as f32) * 0.111;
-                    let font_size = cells_size * 0.4;
-                    let x1 = cells_size * 0.25;
-                    let x2 = cells_size * 8.75;
-                    let y = cells_size * (row as f32 + 1.0);
-
-                    let text1 = Text {
-                        content: rank.into(),
-                        position: Point::new(x1, y),
-                        color,
-                        size: font_size,
-                        font: Font::default(),
-                        horizontal_alignment: iced::alignment::Horizontal::Center,
-                        vertical_alignment: iced::alignment::Vertical::Center,
-                    };
-                    frame.fill_text(text1);
-
-                    let text2 = Text {
-                        content: rank.into(),
-                        position: Point::new(x2, y),
-                        color,
-                        size: font_size,
-                        font: Font::default(),
-                        horizontal_alignment: iced::alignment::Horizontal::Center,
-                        vertical_alignment: iced::alignment::Vertical::Center,
-                    };
-                    frame.fill_text(text2);
-                });
-            },
-        );
-
         let player_turn = self.turn_cache.draw(
             Size {
                 width: size,
