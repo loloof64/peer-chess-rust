@@ -2,7 +2,7 @@
 
 Play chess remotely with your friends.
 
-## Credits
+## Credits
 
 * Chess vectors have been downloaded at [https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces](Wikimedia Commons) and designed by CBurnett.
 * Some pictures have been downloaded from [SvgRepo](https://www.svgrepo.com/):
