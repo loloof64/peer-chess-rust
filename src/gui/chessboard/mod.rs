@@ -1,4 +1,6 @@
-use iced::{Color, Element, Length, Point, Rectangle, Size, Font};
+use std::marker::PhantomData;
+
+use iced::{Color, Element, Font, Length, Point, Rectangle, Size};
 
 use iced_native::renderer::BorderRadius;
 use iced_native::text::Text;
@@ -11,7 +13,7 @@ pub struct ChessBoard {
     white_cell_color: Color,
     black_cell_color: Color,
     text_color: Color,
-    //white_turn: bool,
+    white_turn: bool,
 }
 
 impl ChessBoard {
@@ -22,7 +24,7 @@ impl ChessBoard {
             white_cell_color: Color::from_rgb8(0xFF, 0xDE, 0xAD),
             black_cell_color: Color::from_rgb8(0xCD, 0x85, 0x3F),
             text_color: Color::from_rgb8(0xFF, 0xFF, 0x00),
-            //white_turn: true,
+            white_turn: true,
         }
     }
 }
@@ -57,13 +59,37 @@ where
         _cursor_position: Point,
         _viewport: &Rectangle,
     ) {
-        let cells_size = (self.size as f32) * 0.111;
         let bounds = layout.bounds();
 
-        let files = vec!["A", "B", "C", "D", "E", "F", "G", "H"];
-        let ranks = vec!["8", "7", "6", "5", "4", "3", "2", "1"];
+        DrawingHelper::draw_background(self, renderer, bounds);
+        DrawingHelper::draw_cells(self, renderer, bounds);
+        DrawingHelper::draw_coordinates(self, renderer, bounds);
+        DrawingHelper::draw_player_turn(self, renderer, bounds);
+        
+    }
+}
 
-        // draw background
+impl<'a, Message, Renderer> From<ChessBoard> for Element<'a, Message, Renderer>
+where
+    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
+{
+    fn from(board: ChessBoard) -> Self {
+        Self::new(board)
+    }
+}
+
+struct DrawingHelper<Renderer>
+where
+    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
+{
+    _renderer: PhantomData<Renderer>,
+}
+
+impl<Renderer> DrawingHelper<Renderer>
+where
+    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
+{
+    fn draw_background(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
         renderer.fill_quad(
             renderer::Quad {
                 bounds,
@@ -71,17 +97,19 @@ where
                 border_width: 0f32,
                 border_radius: BorderRadius::default(),
             },
-            self.background_color,
+            board.background_color,
         );
+    }
 
-        // draw cells
+    fn draw_cells(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+        let cells_size = (board.size as f32) * 0.111;
         (0..8).for_each(|row| {
             (0..8).for_each(|col| {
                 let is_white_cell = (row + col) % 2 == 0;
                 let cell_color = if is_white_cell {
-                    self.white_cell_color
+                    board.white_cell_color
                 } else {
-                    self.black_cell_color
+                    board.black_cell_color
                 };
                 let x = cells_size * (col as f32 + 0.5) + bounds.x;
                 let y = cells_size * (row as f32 + 0.5) + bounds.y;
@@ -102,10 +130,14 @@ where
                 );
             });
         });
+    }
 
-        // draw coordinates
+    fn draw_coordinates(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+        let files = vec!["A", "B", "C", "D", "E", "F", "G", "H"];
+        let ranks = vec!["8", "7", "6", "5", "4", "3", "2", "1"];
+
         files.into_iter().enumerate().for_each(|(col, file)| {
-            let cells_size = (self.size as f32) * 0.111;
+            let cells_size = (board.size as f32) * 0.111;
             let font_size = cells_size * 0.4;
             let x = cells_size * (col as f32 + 1.0) + bounds.x;
             let y1 = cells_size * 0.25 + bounds.y;
@@ -113,8 +145,13 @@ where
 
             let text1 = Text {
                 content: file.into(),
-                bounds: Rectangle { x, y: y1, width: font_size, height: font_size },
-                color: self.text_color,
+                bounds: Rectangle {
+                    x,
+                    y: y1,
+                    width: font_size,
+                    height: font_size,
+                },
+                color: board.text_color,
                 size: font_size,
                 font: Font::default(),
                 horizontal_alignment: iced::alignment::Horizontal::Center,
@@ -124,8 +161,13 @@ where
 
             let text2 = Text {
                 content: file.into(),
-                bounds: Rectangle { x, y: y2, width: font_size, height: font_size },
-                color: self.text_color,
+                bounds: Rectangle {
+                    x,
+                    y: y2,
+                    width: font_size,
+                    height: font_size,
+                },
+                color: board.text_color,
                 size: font_size,
                 font: Font::default(),
                 horizontal_alignment: iced::alignment::Horizontal::Center,
@@ -135,7 +177,7 @@ where
         });
 
         ranks.into_iter().enumerate().for_each(|(row, rank)| {
-            let cells_size = (self.size as f32) * 0.111;
+            let cells_size = (board.size as f32) * 0.111;
             let font_size = cells_size * 0.4;
             let x1 = cells_size * 0.25 + bounds.x;
             let x2 = cells_size * 8.75 + bounds.x;
@@ -143,8 +185,13 @@ where
 
             let text1 = Text {
                 content: rank.into(),
-                bounds: Rectangle { x: x1, y: y, width: font_size, height: font_size },
-                color: self.text_color,
+                bounds: Rectangle {
+                    x: x1,
+                    y: y,
+                    width: font_size,
+                    height: font_size,
+                },
+                color: board.text_color,
                 size: font_size,
                 font: Font::default(),
                 horizontal_alignment: iced::alignment::Horizontal::Center,
@@ -154,8 +201,13 @@ where
 
             let text2 = Text {
                 content: rank.into(),
-                bounds: Rectangle { x: x2, y, width: font_size, height: font_size },
-                color: self.text_color,
+                bounds: Rectangle {
+                    x: x2,
+                    y,
+                    width: font_size,
+                    height: font_size,
+                },
+                color: board.text_color,
                 size: font_size,
                 font: Font::default(),
                 horizontal_alignment: iced::alignment::Horizontal::Center,
@@ -164,35 +216,29 @@ where
             renderer.fill_text(text2);
         });
     }
-}
 
-impl<'a, Message, Renderer> From<ChessBoard> for Element<'a, Message, Renderer>
-where
-    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
-{
-    fn from(board: ChessBoard) -> Self {
-        Self::new(board)
+    fn draw_player_turn(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+        let cells_size = (board.size as f32) * 0.111;
+        let x = cells_size * 8.5 + bounds.x;
+        let y = cells_size * 8.5 + bounds.y;
+        let color = if board.white_turn {
+            Color::WHITE
+        } else {
+            Color::BLACK
+        };
+        renderer.fill_quad(
+            renderer::Quad {
+                bounds: Rectangle {
+                    x,
+                    y,
+                    width: cells_size * 0.5f32,
+                    height: cells_size * 0.5f32,
+                },
+                border_radius: BorderRadius::from(cells_size * 0.5f32),
+                border_width: 0f32,
+                border_color: Color::TRANSPARENT,
+            },
+            color,
+        );
     }
 }
-
-/*
-        let player_turn = self.turn_cache.draw(
-            Size {
-                width: size,
-                height: size,
-            },
-            |frame| {
-                let cells_size = (self.size as f32) * 0.111;
-                let location = cells_size * 8.75;
-                let circle = Path::circle(Point::new(location, location), cells_size * 0.25);
-                frame.fill(
-                    &circle,
-                    if self.white_turn {
-                        Color::WHITE
-                    } else {
-                        Color::BLACK
-                    },
-                );
-            },
-        );
-*/
