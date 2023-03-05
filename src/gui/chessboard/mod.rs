@@ -4,10 +4,23 @@ use drawing_helper::DrawingHelper;
 mod pieces_vectors;
 use pieces_vectors::PiecesVectors;
 
+mod mouse_handler;
+use mouse_handler::MouseHandler;
+
+use iced::event::Status;
+use iced::Event::Mouse;
 use iced::{Color, Element, Font, Length, Point, Rectangle, Size};
-use iced_native::{layout, renderer, svg, text, Widget};
+use iced_native::{layout, mouse, renderer, svg, text, Widget};
 
 use pleco::Board;
+
+#[derive(Clone)]
+struct DragAndDropData {
+    start_file: i8,
+    start_rank: i8,
+    end_file: i8,
+    end_rank: i8,
+}
 
 #[derive(Clone)]
 pub struct ChessBoard {
@@ -19,11 +32,13 @@ pub struct ChessBoard {
     pieces_images: PiecesVectors,
     logic: Board,
     reversed: bool,
+    mouse_x: f32,
+    mouse_y: f32,
+    drag_and_drop_data: Option<DragAndDropData>,
 }
 
 impl ChessBoard {
     pub fn new(size: u16) -> Self {
-        
         Self {
             size,
             background_color: Color::from_rgb8(0x15, 0x88, 0xC4),
@@ -33,11 +48,14 @@ impl ChessBoard {
             pieces_images: PiecesVectors::new(),
             logic: Board::default(),
             reversed: false,
+            drag_and_drop_data: None,
+            mouse_x: 0f32,
+            mouse_y: 0f32,
         }
     }
 
     pub fn toggle_orientation(&mut self) {
-        self.reversed = ! self.reversed;
+        self.reversed = !self.reversed;
     }
 }
 
@@ -78,6 +96,47 @@ where
         DrawingHelper::draw_coordinates(self, renderer, bounds);
         DrawingHelper::draw_player_turn(self, renderer, bounds);
         DrawingHelper::draw_pieces(self, renderer, bounds);
+    }
+
+    fn on_event(
+        &mut self,
+        _state: &mut iced_native::widget::Tree,
+        event: iced::Event,
+        layout: iced_native::Layout<'_>,
+        _cursor_position: Point,
+        _renderer: &Renderer,
+        _clipboard: &mut dyn iced_native::Clipboard,
+        _shell: &mut iced_native::Shell<'_, Message>,
+    ) -> iced::event::Status {
+        let bounds = layout.bounds();
+        match event {
+            Mouse(event) => match event {
+                mouse::Event::ButtonPressed(button) => match button {
+                    mouse::Button::Left => {
+                        MouseHandler::handle_left_button_pressed(self);
+                        Status::Captured
+                    }
+                    _ => Status::Ignored,
+                },
+                mouse::Event::ButtonReleased(button) => match button {
+                    mouse::Button::Left => {
+                        MouseHandler::handle_left_button_released(self);
+                        Status::Captured
+                    }
+                    _ => Status::Ignored,
+                },
+                mouse::Event::CursorMoved { position } => {
+                    let x = position.x - bounds.x;
+                    let y = position.y - bounds.y;
+                    self.mouse_x = x;
+                    self.mouse_y = y;
+                    MouseHandler::handle_mouse_moved(self);
+                    Status::Captured
+                }
+                _ => Status::Ignored,
+            },
+            _ => Status::Ignored,
+        }
     }
 }
 

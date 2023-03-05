@@ -13,7 +13,7 @@ use pleco::{ File, Piece, Rank, SQ, Player};
 
 pub struct DrawingHelper<Renderer>
 where
-    Renderer: renderer::Renderer + text::Renderer<Font = Font>,
+    Renderer: renderer::Renderer + text::Renderer<Font = Font> + svg::Renderer,
 {
     _renderer: PhantomData<Renderer>,
 }
