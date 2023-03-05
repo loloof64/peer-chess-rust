@@ -1,9 +1,9 @@
-use pleco::{SQ, Piece};
+use pleco::{BitMove, Piece, SQ};
 
 use crate::gui::chessboard::DragAndDropData;
 
-use super::ChessBoard;
 use super::utils::Utils;
+use super::ChessBoard;
 
 pub struct MouseHandler {}
 
@@ -57,7 +57,33 @@ impl MouseHandler {
             let dnd_data = board.drag_and_drop_data.clone().unwrap();
             let end_file = dnd_data.end_file;
             let end_rank = dnd_data.end_rank;
-            
+
+            let end_square_in_cell_bounds =
+                end_file >= 0 && end_file <= 7 && end_rank >= 0 && end_rank <= 7;
+            if end_square_in_cell_bounds {
+                let pleco_start_file = Utils::coord_file_to_pleco_file(dnd_data.start_file as i32);
+                let pleco_start_rank = Utils::coord_rank_to_pleco_rank(dnd_data.start_rank as i32);
+                let start_square = SQ::make(pleco_start_file, pleco_start_rank);
+
+                let pleco_end_file = Utils::coord_file_to_pleco_file(dnd_data.end_file as i32);
+                let pleco_end_rank = Utils::coord_rank_to_pleco_rank(dnd_data.end_rank as i32);
+                let end_square = SQ::make(pleco_end_file, pleco_end_rank);
+
+                let legal_moves = board.logic.generate_moves();
+                let mut pleco_move: Option<BitMove> = None;
+                for current_move in legal_moves.iter() {
+                    if current_move.get_src() == start_square
+                        && current_move.get_dest() == end_square
+                    {
+                        pleco_move = Some(*current_move);
+                    }
+                }
+
+                if let Some(pleco_move) = pleco_move {
+                    board.logic.apply_move(pleco_move);
+                }
+            }
+
             board.drag_and_drop_data = None;
         }
     }
@@ -71,8 +97,16 @@ impl MouseHandler {
             let cell_col = ((x - cells_size * 0.5f32) / cells_size) as i32;
             let cell_row = ((y - cells_size * 0.5f32) / cells_size) as i32;
 
-            let end_file = (if board.reversed {7-cell_col} else {cell_col}) as i8;
-            let end_rank = (if board.reversed {cell_row} else {7-cell_row}) as i8;
+            let end_file = (if board.reversed {
+                7 - cell_col
+            } else {
+                cell_col
+            }) as i8;
+            let end_rank = (if board.reversed {
+                cell_row
+            } else {
+                7 - cell_row
+            }) as i8;
 
             let mut dnd_data = board.drag_and_drop_data.clone().unwrap();
 
