@@ -40,12 +40,41 @@ where
         let cells_size = (board.size as f32) * 0.111;
         (0..8).for_each(|row| {
             (0..8).for_each(|col| {
+                let file = if board.reversed { 7 - col } else { col };
+                let rank = if board.reversed { row } else { 7 - row };
+
+                let is_start_cell = match board.drag_and_drop_data.clone() {
+                    Some(dnd_data) => dnd_data.start_file == file && dnd_data.start_rank == rank,
+                    _ => false,
+                };
+
+                let is_end_cell = match board.drag_and_drop_data.clone() {
+                    Some(dnd_data) => dnd_data.end_file == file && dnd_data.end_rank == rank,
+                    _ => false,
+                };
+
+                let is_cross_cell = match board.drag_and_drop_data.clone() {
+                    Some(dnd_data) => dnd_data.end_file == file || dnd_data.end_rank == rank,
+                    _ => false,
+                };
+
                 let is_white_cell = (row + col) % 2 == 0;
-                let cell_color = if is_white_cell {
+                let mut cell_color = if is_white_cell {
                     board.white_cell_color
                 } else {
                     board.black_cell_color
                 };
+
+                if is_cross_cell {
+                    cell_color = board.dnd_cross_cells_color;
+                }
+                if is_start_cell {
+                    cell_color = board.dnd_start_cell_color;
+                }
+                if is_end_cell {
+                    cell_color = board.dnd_end_cell_color;
+                }
+
                 let x = cells_size * (col as f32 + 0.5) + bounds.x;
                 let y = cells_size * (row as f32 + 0.5) + bounds.y;
 
