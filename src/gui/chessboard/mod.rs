@@ -52,8 +52,8 @@ impl ChessBoard {
             logic: Board::default(),
             reversed: false,
             drag_and_drop_data: None,
-            mouse_x: 0f32,
-            mouse_y: 0f32,
+            mouse_x: f32::INFINITY,
+            mouse_y: f32::INFINITY,
         }
     }
 
