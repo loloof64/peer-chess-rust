@@ -3,9 +3,9 @@ use chessboard::ChessBoard;
 
 use iced::theme::Theme;
 use iced::widget::{button, container, svg, Column};
-use iced::Alignment;
 use iced::Element;
-use iced::{Length, Sandbox};
+use iced::Length;
+use iced::{Alignment, Application, Command};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -16,22 +16,31 @@ pub struct App {
     board: ChessBoard,
 }
 
-impl Sandbox for App {
+impl Application for App {
     type Message = Message;
+    type Executor = iced::executor::Default;
+    type Theme = iced::Theme;
+    type Flags = ();
 
-    fn new() -> Self {
-        Self {
-            board: ChessBoard::new(400u16),
-        }
+    fn new(_flags: ()) -> (Self, Command<Message>) {
+        (
+            Self {
+                board: ChessBoard::new(400u16),
+            },
+            Command::none(),
+        )
     }
 
     fn title(&self) -> String {
         String::from("Peer chess")
     }
 
-    fn update(&mut self, message: Message) {
+    fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::ToggleBoardOrientation => self.board.toggle_orientation(),
+            Message::ToggleBoardOrientation => {
+                self.board.toggle_orientation();
+                Command::none()
+            }
         }
     }
 
