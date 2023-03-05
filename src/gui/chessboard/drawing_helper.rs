@@ -184,8 +184,8 @@ where
 
         (0..8).for_each(|row| {
             (0..8).for_each(|col| {
-                let file = col;
-                let rank = 7 - row;
+                let file = if board.reversed { 7 - col } else { col };
+                let rank = if board.reversed { row } else { 7 - row };
 
                 let is_the_moved_piece = match board.drag_and_drop_data.clone() {
                     Some(dnd_data) => dnd_data.start_file == file && dnd_data.start_rank == rank,
@@ -200,20 +200,8 @@ where
                         DrawingHelper::<Renderer>::pleco_piece_to_image_handle(board, piece);
                     if let Some(piece_image_handle) = piece_image_handle {
                         let cell_bounds = Rectangle {
-                            x: cells_size
-                                * (if board.reversed {
-                                    7.5f32 - file as f32
-                                } else {
-                                    0.5f32 + file as f32
-                                })
-                                + bounds.x,
-                            y: cells_size
-                                * (if board.reversed {
-                                    0.5f32 + rank as f32
-                                } else {
-                                    7.5f32 - rank as f32
-                                })
-                                + bounds.y,
+                            x: cells_size * (0.5f32 + col as f32) + bounds.x,
+                            y: cells_size * (0.5f32 + row as f32) + bounds.y,
                             width: cells_size,
                             height: cells_size,
                         };
