@@ -1,6 +1,9 @@
+use pleco::{SQ, Piece};
+
 use crate::gui::chessboard::DragAndDropData;
 
 use super::ChessBoard;
+use super::utils::Utils;
 
 pub struct MouseHandler {}
 
@@ -31,17 +34,25 @@ impl MouseHandler {
                     7 - cell_row
                 };
 
-                board.drag_and_drop_data = Some(DragAndDropData {
-                    start_file,
-                    start_rank,
-                    end_file: start_file,
-                    end_rank: start_rank,
-                });
+                let pleco_file = Utils::coord_file_to_pleco_file(start_file as i32);
+                let pleco_rank = Utils::coord_rank_to_pleco_rank(start_rank as i32);
+                let square = SQ::make(pleco_file, pleco_rank);
+                let moved_piece = board.logic.piece_at_sq(square);
 
-                println!(
-                    "Left button pressed at cell ({}, {}) !",
-                    start_file, start_rank
-                );
+                if moved_piece != Piece::None {
+                    board.drag_and_drop_data = Some(DragAndDropData {
+                        start_file,
+                        start_rank,
+                        end_file: start_file,
+                        end_rank: start_rank,
+                        moved_piece,
+                    });
+    
+                    println!(
+                        "Drag and drop started at cell ({}, {}) !",
+                        start_file, start_rank
+                    );
+                }
             }
         }
     }
@@ -52,7 +63,7 @@ impl MouseHandler {
             let end_file = dnd_data.end_file;
             let end_rank = dnd_data.end_rank;
             println!(
-                "Left button released at cell ({}, {}) !",
+                "Drag and drop ended at cell ({}, {}) !",
                 end_file, end_rank
             );
             board.drag_and_drop_data = None;
@@ -79,7 +90,7 @@ impl MouseHandler {
             board.drag_and_drop_data = Some(dnd_data);
 
             println!(
-                "Left button moved at cell ({}, {}) !",
+                "Drag and drop move at cell ({}, {}) !",
                 end_file, end_rank
             );
         }

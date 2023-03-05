@@ -7,12 +7,14 @@ use pieces_vectors::PiecesVectors;
 mod mouse_handler;
 use mouse_handler::MouseHandler;
 
+mod utils;
+
 use iced::event::Status;
 use iced::Event::Mouse;
 use iced::{Color, Element, Font, Length, Point, Rectangle, Size};
 use iced_native::{layout, mouse, renderer, svg, text, Widget};
 
-use pleco::Board;
+use pleco::{Board, Piece};
 
 #[derive(Clone)]
 struct DragAndDropData {
@@ -20,6 +22,7 @@ struct DragAndDropData {
     start_rank: i8,
     end_file: i8,
     end_rank: i8,
+    moved_piece: Piece,
 }
 
 #[derive(Clone)]
@@ -96,6 +99,7 @@ where
         DrawingHelper::draw_coordinates(self, renderer, bounds);
         DrawingHelper::draw_player_turn(self, renderer, bounds);
         DrawingHelper::draw_pieces(self, renderer, bounds);
+        DrawingHelper::draw_moved_piece(self, renderer, bounds);
     }
 
     fn on_event(

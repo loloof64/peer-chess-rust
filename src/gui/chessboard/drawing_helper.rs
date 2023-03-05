@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
 
+use super::utils::Utils;
+
 use super::ChessBoard;
 
 use iced::{Color, Font, Rectangle};
@@ -7,9 +9,9 @@ use iced::{Color, Font, Rectangle};
 use iced_native::renderer::BorderRadius;
 use iced_native::svg::Handle;
 use iced_native::text::Text;
-use iced_native::{ renderer, svg, text};
+use iced_native::{renderer, svg, text};
 
-use pleco::{ File, Piece, Rank, SQ, Player};
+use pleco::{Piece, Player, SQ};
 
 pub struct DrawingHelper<Renderer>
 where
@@ -72,7 +74,8 @@ where
         files.into_iter().enumerate().for_each(|(col, file_str)| {
             let cells_size = (board.size as f32) * 0.111;
             let font_size = cells_size * 0.4;
-            let x = cells_size * ((if board.reversed {7-col} else {col}) as f32 + 1.0) + bounds.x;
+            let x =
+                cells_size * ((if board.reversed { 7 - col } else { col }) as f32 + 1.0) + bounds.x;
             let y1 = cells_size * 0.25 + bounds.y;
             let y2 = cells_size * 8.75 + bounds.y;
 
@@ -114,7 +117,8 @@ where
             let font_size = cells_size * 0.4;
             let x1 = cells_size * 0.25 + bounds.x;
             let x2 = cells_size * 8.75 + bounds.x;
-            let y = cells_size * (if board.reversed {7-row} else {row} as f32 + 1.0) + bounds.y;
+            let y =
+                cells_size * (if board.reversed { 7 - row } else { row } as f32 + 1.0) + bounds.y;
 
             let text1 = Text {
                 content: rank_str.into(),
@@ -182,55 +186,57 @@ where
             (0..8).for_each(|col| {
                 let file = col;
                 let rank = 7 - row;
-                let pleco_file = DrawingHelper::<Renderer>::coord_file_to_pleco_file(file);
-                let pleco_rank = DrawingHelper::<Renderer>::coord_rank_to_pleco_rank(rank);
+                let pleco_file = Utils::coord_file_to_pleco_file(file);
+                let pleco_rank = Utils::coord_rank_to_pleco_rank(rank);
                 let piece = board.logic.piece_at_sq(SQ::make(pleco_file, pleco_rank));
                 let piece_image_handle =
                     DrawingHelper::<Renderer>::pleco_piece_to_image_handle(board, piece);
-                if piece_image_handle.is_some() {
+                if let Some(piece_image_handle) = piece_image_handle {
                     let cell_bounds = Rectangle {
-                        x: cells_size * (if board.reversed {7.5f32 - file as f32} else  {0.5f32 + file as f32}) + bounds.x,
-                        y: cells_size * (if board.reversed {0.5f32 + rank as f32} else {7.5f32 - rank as f32}) + bounds.y,
+                        x: cells_size
+                            * (if board.reversed {
+                                7.5f32 - file as f32
+                            } else {
+                                0.5f32 + file as f32
+                            })
+                            + bounds.x,
+                        y: cells_size
+                            * (if board.reversed {
+                                0.5f32 + rank as f32
+                            } else {
+                                7.5f32 - rank as f32
+                            })
+                            + bounds.y,
                         width: cells_size,
                         height: cells_size,
                     };
-                    renderer.draw(piece_image_handle.unwrap().clone(), None, cell_bounds);
+                    renderer.draw(piece_image_handle, None, cell_bounds);
                 }
             });
         });
     }
 
-    fn coord_file_to_pleco_file(input: i32) -> File {
-        let constrained_input = input.max(0).min(7);
-        match constrained_input {
-            0 => File::A,
-            1 => File::B,
-            2 => File::C,
-            3 => File::D,
-            4 => File::E,
-            5 => File::F,
-            6 => File::G,
-            7 => File::H,
-            _ => File::A,
+    pub fn draw_moved_piece(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+        let cells_size = (board.size as f32) * 0.111;
+
+        if board.drag_and_drop_data.is_some() {
+            let piece_image_handle = DrawingHelper::<Renderer>::pleco_piece_to_image_handle(
+                board,
+                board.drag_and_drop_data.clone().unwrap().moved_piece,
+            );
+            if let Some(piece_image_handle) = piece_image_handle {
+                let cell_bounds = Rectangle {
+                    x: board.mouse_x + bounds.x,
+                    y: board.mouse_y + bounds.y,
+                    width: cells_size,
+                    height: cells_size,
+                };
+                renderer.draw(piece_image_handle, None, cell_bounds);
+            }
         }
     }
 
-    fn coord_rank_to_pleco_rank(input: i32) -> Rank {
-        let constrained_input = input.max(0).min(7);
-        match constrained_input {
-            0 => Rank::R1,
-            1 => Rank::R2,
-            2 => Rank::R3,
-            3 => Rank::R4,
-            4 => Rank::R5,
-            5 => Rank::R6,
-            6 => Rank::R7,
-            7 => Rank::R8,
-            _ => Rank::R1,
-        }
-    }
-
-    pub fn pleco_piece_to_image_handle(board: &ChessBoard, piece: Piece) -> Option<Handle> {
+    fn pleco_piece_to_image_handle(board: &ChessBoard, piece: Piece) -> Option<Handle> {
         match piece {
             Piece::None => None,
             Piece::WhitePawn => Some(board.pieces_images.svg_wp.clone()),
