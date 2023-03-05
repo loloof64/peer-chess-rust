@@ -186,31 +186,39 @@ where
             (0..8).for_each(|col| {
                 let file = col;
                 let rank = 7 - row;
-                let pleco_file = Utils::coord_file_to_pleco_file(file);
-                let pleco_rank = Utils::coord_rank_to_pleco_rank(rank);
-                let piece = board.logic.piece_at_sq(SQ::make(pleco_file, pleco_rank));
-                let piece_image_handle =
-                    DrawingHelper::<Renderer>::pleco_piece_to_image_handle(board, piece);
-                if let Some(piece_image_handle) = piece_image_handle {
-                    let cell_bounds = Rectangle {
-                        x: cells_size
-                            * (if board.reversed {
-                                7.5f32 - file as f32
-                            } else {
-                                0.5f32 + file as f32
-                            })
-                            + bounds.x,
-                        y: cells_size
-                            * (if board.reversed {
-                                0.5f32 + rank as f32
-                            } else {
-                                7.5f32 - rank as f32
-                            })
-                            + bounds.y,
-                        width: cells_size,
-                        height: cells_size,
-                    };
-                    renderer.draw(piece_image_handle, None, cell_bounds);
+
+                let is_the_moved_piece = match board.drag_and_drop_data.clone() {
+                    Some(dnd_data) => dnd_data.start_file == file && dnd_data.start_rank == rank,
+                    _ => false,
+                };
+
+                if !is_the_moved_piece {
+                    let pleco_file = Utils::coord_file_to_pleco_file(file as i32);
+                    let pleco_rank = Utils::coord_rank_to_pleco_rank(rank as i32);
+                    let piece = board.logic.piece_at_sq(SQ::make(pleco_file, pleco_rank));
+                    let piece_image_handle =
+                        DrawingHelper::<Renderer>::pleco_piece_to_image_handle(board, piece);
+                    if let Some(piece_image_handle) = piece_image_handle {
+                        let cell_bounds = Rectangle {
+                            x: cells_size
+                                * (if board.reversed {
+                                    7.5f32 - file as f32
+                                } else {
+                                    0.5f32 + file as f32
+                                })
+                                + bounds.x,
+                            y: cells_size
+                                * (if board.reversed {
+                                    0.5f32 + rank as f32
+                                } else {
+                                    7.5f32 - rank as f32
+                                })
+                                + bounds.y,
+                            width: cells_size,
+                            height: cells_size,
+                        };
+                        renderer.draw(piece_image_handle, None, cell_bounds);
+                    }
                 }
             });
         });
