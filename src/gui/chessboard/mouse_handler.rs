@@ -47,11 +47,6 @@ impl MouseHandler {
                         end_rank: start_rank,
                         moved_piece,
                     });
-    
-                    println!(
-                        "Drag and drop started at cell ({}, {}) !",
-                        start_file, start_rank
-                    );
                 }
             }
         }
@@ -62,10 +57,7 @@ impl MouseHandler {
             let dnd_data = board.drag_and_drop_data.clone().unwrap();
             let end_file = dnd_data.end_file;
             let end_rank = dnd_data.end_rank;
-            println!(
-                "Drag and drop ended at cell ({}, {}) !",
-                end_file, end_rank
-            );
+            
             board.drag_and_drop_data = None;
         }
     }
@@ -88,11 +80,6 @@ impl MouseHandler {
             dnd_data.end_rank = end_rank;
 
             board.drag_and_drop_data = Some(dnd_data);
-
-            println!(
-                "Drag and drop move at cell ({}, {}) !",
-                end_file, end_rank
-            );
         }
     }
 }
