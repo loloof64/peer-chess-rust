@@ -233,18 +233,18 @@ where
     pub fn pleco_piece_to_image_handle(board: &ChessBoard, piece: Piece) -> Option<Handle> {
         match piece {
             Piece::None => None,
-            Piece::WhitePawn => Some(board.svg_wp.clone()),
-            Piece::WhiteKnight => Some(board.svg_wn.clone()),
-            Piece::WhiteBishop => Some(board.svg_wb.clone()),
-            Piece::WhiteRook => Some(board.svg_wr.clone()),
-            Piece::WhiteQueen => Some(board.svg_wq.clone()),
-            Piece::WhiteKing => Some(board.svg_wk.clone()),
-            Piece::BlackPawn => Some(board.svg_bp.clone()),
-            Piece::BlackKnight => Some(board.svg_bn.clone()),
-            Piece::BlackBishop => Some(board.svg_bb.clone()),
-            Piece::BlackRook => Some(board.svg_br.clone()),
-            Piece::BlackQueen => Some(board.svg_bq.clone()),
-            Piece::BlackKing => Some(board.svg_bk.clone()),
+            Piece::WhitePawn => Some(board.pieces_images.svg_wp.clone()),
+            Piece::WhiteKnight => Some(board.pieces_images.svg_wn.clone()),
+            Piece::WhiteBishop => Some(board.pieces_images.svg_wb.clone()),
+            Piece::WhiteRook => Some(board.pieces_images.svg_wr.clone()),
+            Piece::WhiteQueen => Some(board.pieces_images.svg_wq.clone()),
+            Piece::WhiteKing => Some(board.pieces_images.svg_wk.clone()),
+            Piece::BlackPawn => Some(board.pieces_images.svg_bp.clone()),
+            Piece::BlackKnight => Some(board.pieces_images.svg_bn.clone()),
+            Piece::BlackBishop => Some(board.pieces_images.svg_bb.clone()),
+            Piece::BlackRook => Some(board.pieces_images.svg_br.clone()),
+            Piece::BlackQueen => Some(board.pieces_images.svg_bq.clone()),
+            Piece::BlackKing => Some(board.pieces_images.svg_bk.clone()),
         }
     }
 }

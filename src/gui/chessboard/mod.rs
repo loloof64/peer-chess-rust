@@ -1,9 +1,10 @@
 mod drawing_helper;
 use drawing_helper::DrawingHelper;
 
-use iced::{Color, Element, Font, Length, Point, Rectangle, Size};
+mod pieces_vectors;
+use pieces_vectors::PiecesVectors;
 
-use iced_native::svg::Handle;
+use iced::{Color, Element, Font, Length, Point, Rectangle, Size};
 use iced_native::{layout, renderer, svg, text, Widget};
 
 use pleco::Board;
@@ -15,90 +16,21 @@ pub struct ChessBoard {
     white_cell_color: Color,
     black_cell_color: Color,
     text_color: Color,
-    svg_wp: Handle,
-    svg_wn: Handle,
-    svg_wb: Handle,
-    svg_wr: Handle,
-    svg_wq: Handle,
-    svg_wk: Handle,
-    svg_bp: Handle,
-    svg_bn: Handle,
-    svg_bb: Handle,
-    svg_br: Handle,
-    svg_bq: Handle,
-    svg_bk: Handle,
+    pieces_images: PiecesVectors,
     logic: Board,
     reversed: bool,
 }
 
 impl ChessBoard {
     pub fn new(size: u16) -> Self {
-        let svg_wp = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_plt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_wn = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_nlt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_wb = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_blt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_wr = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_rlt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_wq = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_qlt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_wk = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_klt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_bp = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_pdt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_bn = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_ndt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_bb = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_bdt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_br = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_rdt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_bq = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_qdt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
-        let svg_bk = svg::Handle::from_path(format!(
-            "{}/resources/images/chess_vectors/Chess_kdt45.svg",
-            env!("CARGO_MANIFEST_DIR")
-        ));
+        
         Self {
             size,
             background_color: Color::from_rgb8(0x15, 0x88, 0xC4),
             white_cell_color: Color::from_rgb8(0xFF, 0xDE, 0xAD),
             black_cell_color: Color::from_rgb8(0xCD, 0x85, 0x3F),
             text_color: Color::from_rgb8(0xFF, 0xFF, 0x00),
-            svg_wp,
-            svg_wn,
-            svg_wb,
-            svg_wr,
-            svg_wq,
-            svg_wk,
-            svg_bp,
-            svg_bn,
-            svg_bb,
-            svg_br,
-            svg_bq,
-            svg_bk,
+            pieces_images: PiecesVectors::new(),
             logic: Board::default(),
             reversed: false,
         }
