@@ -25,8 +25,7 @@ struct DragAndDropData {
     moved_piece: Piece,
 }
 
-#[derive(Clone)]
-pub struct ChessBoard {
+pub struct ChessBoard<'a, Message> {
     size: u16,
     background_color: Color,
     white_cell_color: Color,
@@ -41,9 +40,10 @@ pub struct ChessBoard {
     mouse_x: f32,
     mouse_y: f32,
     drag_and_drop_data: Option<DragAndDropData>,
+    on_new_position: Option<Box<dyn Fn(String) -> Message + 'a>>,
 }
 
-impl ChessBoard {
+impl<'a, Message> ChessBoard<'a, Message> {
     pub fn new(size: u16) -> Self {
         Self {
             size,
@@ -60,6 +60,7 @@ impl ChessBoard {
             drag_and_drop_data: None,
             mouse_x: f32::INFINITY,
             mouse_y: f32::INFINITY,
+            on_new_position: None,
         }
     }
 
@@ -70,9 +71,13 @@ impl ChessBoard {
     pub fn set_orientation(&mut self, black_at_bottom: bool) {
         self.reversed = black_at_bottom;
     }
+
+    pub fn set_on_new_position(&mut self, on_new_position: Box<dyn Fn(String) -> Message + 'a>) {
+        self.on_new_position = Some(on_new_position);
+    }
 }
 
-impl<Message, Renderer> Widget<Message, Renderer> for ChessBoard
+impl<'a, Message, Renderer> Widget<Message, Renderer> for ChessBoard<'a, Message>
 where
     Renderer: renderer::Renderer + text::Renderer<Font = Font> + svg::Renderer,
 {
@@ -120,7 +125,7 @@ where
         _cursor_position: Point,
         _renderer: &Renderer,
         _clipboard: &mut dyn iced_native::Clipboard,
-        _shell: &mut iced_native::Shell<'_, Message>,
+        shell: &mut iced_native::Shell<'_, Message>,
     ) -> iced::event::Status {
         let bounds = layout.bounds();
         match event {
@@ -134,7 +139,7 @@ where
                 },
                 mouse::Event::ButtonReleased(button) => match button {
                     mouse::Button::Left => {
-                        MouseHandler::handle_left_button_released(self);
+                        MouseHandler::handle_left_button_released(self, shell);
                         Status::Captured
                     }
                     _ => Status::Ignored,
@@ -154,11 +159,11 @@ where
     }
 }
 
-impl<'a, Message, Renderer> From<ChessBoard> for Element<'a, Message, Renderer>
+impl<'a, Message: 'a, Renderer> From<ChessBoard<'a, Message>> for Element<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer + text::Renderer<Font = Font> + svg::Renderer,
 {
-    fn from(board: ChessBoard) -> Self {
+    fn from(board: ChessBoard<'a, Message>) -> Self {
         Self::new(board)
     }
 }

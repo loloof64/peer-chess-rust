@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use pleco::{BitMove, Piece, SQ};
 
 use crate::gui::chessboard::DragAndDropData;
@@ -5,10 +7,12 @@ use crate::gui::chessboard::DragAndDropData;
 use super::utils::Utils;
 use super::ChessBoard;
 
-pub struct MouseHandler {}
+pub struct MouseHandler<Message> {
+    _msg: PhantomData<Message>,
+}
 
-impl MouseHandler {
-    pub fn handle_left_button_pressed(board: &mut ChessBoard) {
+impl<Message> MouseHandler<Message> {
+    pub fn handle_left_button_pressed(board: &mut ChessBoard<Message>) {
         let cells_size = (board.size as f32) * 0.111;
         if board.drag_and_drop_data.is_none() {
             let x = board.mouse_x;
@@ -52,7 +56,7 @@ impl MouseHandler {
         }
     }
 
-    pub fn handle_left_button_released(board: &mut ChessBoard) {
+    pub fn handle_left_button_released(board: &mut ChessBoard<Message>, shell: &mut iced_native::Shell<'_, Message>,) {
         if board.drag_and_drop_data.is_some() {
             let dnd_data = board.drag_and_drop_data.clone().unwrap();
             let end_file = dnd_data.end_file;
@@ -81,6 +85,11 @@ impl MouseHandler {
 
                 if let Some(pleco_move) = pleco_move {
                     board.logic.apply_move(pleco_move);
+                    if let Some(ref on_new_position) = board.on_new_position {
+                        let new_fen = board.logic.fen();
+                        let message = (on_new_position)(new_fen);
+                        shell.publish(message);
+                    }
                 }
             }
 
@@ -88,7 +97,7 @@ impl MouseHandler {
         }
     }
 
-    pub fn handle_mouse_moved(board: &mut ChessBoard) {
+    pub fn handle_mouse_moved(board: &mut ChessBoard<Message>) {
         let cells_size = (board.size as f32) * 0.111;
         if board.drag_and_drop_data.is_some() {
             let x = board.mouse_x;

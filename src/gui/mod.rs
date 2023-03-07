@@ -11,6 +11,7 @@ use pleco::Board;
 #[derive(Debug, Clone)]
 pub enum Message {
     ToggleBoardOrientation,
+    UpdateBoardPosition(String),
 }
 
 pub struct App {
@@ -43,6 +44,12 @@ impl Application for App {
             Message::ToggleBoardOrientation => {
                 self.black_at_bottom = ! self.black_at_bottom;
                 Command::none()
+            },
+            Message::UpdateBoardPosition(new_fen) => {
+                if let Ok(new_logic) =  Board::from_fen(&new_fen) {
+                    self.game = new_logic;
+                }
+                Command::none()
             }
         }
     }
@@ -58,6 +65,7 @@ impl Application for App {
         let mut board = ChessBoard::new(400u16);
         board.set_game(self.game.clone());
         board.set_orientation(self.black_at_bottom);
+        board.set_on_new_position(Box::new(|new_fen| Message::UpdateBoardPosition(new_fen)));
         container(
             Column::new()
                 .align_items(Alignment::Center)

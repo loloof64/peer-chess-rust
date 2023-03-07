@@ -13,18 +13,19 @@ use iced_native::{renderer, svg, text};
 
 use pleco::{Piece, Player, SQ};
 
-pub struct DrawingHelper<Renderer>
+pub struct DrawingHelper<Message, Renderer>
 where
     Renderer: renderer::Renderer + text::Renderer<Font = Font> + svg::Renderer,
 {
     _renderer: PhantomData<Renderer>,
+    _msg: PhantomData<Message>,
 }
 
-impl<Renderer> DrawingHelper<Renderer>
+impl<Message, Renderer> DrawingHelper<Message, Renderer>
 where
     Renderer: renderer::Renderer + text::Renderer<Font = Font> + svg::Renderer,
 {
-    pub fn draw_background(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+    pub fn draw_background(board: &ChessBoard<Message>, renderer: &mut Renderer, bounds: Rectangle) {
         renderer.fill_quad(
             renderer::Quad {
                 bounds,
@@ -36,7 +37,7 @@ where
         );
     }
 
-    pub fn draw_cells(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+    pub fn draw_cells(board: &ChessBoard<Message>, renderer: &mut Renderer, bounds: Rectangle) {
         let cells_size = (board.size as f32) * 0.111;
         (0..8).for_each(|row| {
             (0..8).for_each(|col| {
@@ -96,7 +97,7 @@ where
         });
     }
 
-    pub fn draw_coordinates(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+    pub fn draw_coordinates(board: &ChessBoard<Message>, renderer: &mut Renderer, bounds: Rectangle) {
         let files = vec!["A", "B", "C", "D", "E", "F", "G", "H"];
         let ranks = vec!["8", "7", "6", "5", "4", "3", "2", "1"];
 
@@ -183,7 +184,7 @@ where
         });
     }
 
-    pub fn draw_player_turn(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+    pub fn draw_player_turn(board: &ChessBoard<Message>, renderer: &mut Renderer, bounds: Rectangle) {
         let cells_size = (board.size as f32) * 0.111;
         let x = cells_size * 8.5 + bounds.x;
         let y = cells_size * 8.5 + bounds.y;
@@ -208,7 +209,7 @@ where
         );
     }
 
-    pub fn draw_pieces(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+    pub fn draw_pieces(board: &ChessBoard<Message>, renderer: &mut Renderer, bounds: Rectangle) {
         let cells_size = (board.size as f32) * 0.111;
 
         (0..8).for_each(|row| {
@@ -226,7 +227,7 @@ where
                     let pleco_rank = Utils::coord_rank_to_pleco_rank(rank as i32);
                     let piece = board.logic.piece_at_sq(SQ::make(pleco_file, pleco_rank));
                     let piece_image_handle =
-                        DrawingHelper::<Renderer>::pleco_piece_to_image_handle(board, piece);
+                        DrawingHelper::<Message, Renderer>::pleco_piece_to_image_handle(board, piece);
                     if let Some(piece_image_handle) = piece_image_handle {
                         let cell_bounds = Rectangle {
                             x: cells_size * (0.5f32 + col as f32) + bounds.x,
@@ -241,11 +242,11 @@ where
         });
     }
 
-    pub fn draw_moved_piece(board: &ChessBoard, renderer: &mut Renderer, bounds: Rectangle) {
+    pub fn draw_moved_piece(board: &ChessBoard<Message>, renderer: &mut Renderer, bounds: Rectangle) {
         let cells_size = (board.size as f32) * 0.111;
 
         if board.drag_and_drop_data.is_some() {
-            let piece_image_handle = DrawingHelper::<Renderer>::pleco_piece_to_image_handle(
+            let piece_image_handle = DrawingHelper::<Message, Renderer>::pleco_piece_to_image_handle(
                 board,
                 board.drag_and_drop_data.clone().unwrap().moved_piece,
             );
@@ -261,7 +262,7 @@ where
         }
     }
 
-    fn pleco_piece_to_image_handle(board: &ChessBoard, piece: Piece) -> Option<Handle> {
+    fn pleco_piece_to_image_handle(board: &ChessBoard<Message>, piece: Piece) -> Option<Handle> {
         match piece {
             Piece::None => None,
             Piece::WhitePawn => Some(board.pieces_images.svg_wp.clone()),
