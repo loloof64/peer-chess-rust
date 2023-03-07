@@ -63,8 +63,12 @@ impl ChessBoard {
         }
     }
 
-    pub fn toggle_orientation(&mut self) {
-        self.reversed = !self.reversed;
+    pub fn set_game(&mut self, game: Board) {
+        self.logic = game;
+    }
+
+    pub fn set_orientation(&mut self, black_at_bottom: bool) {
+        self.reversed = black_at_bottom;
     }
 }
 

@@ -6,6 +6,7 @@ use iced::widget::{button, container, svg, Column};
 use iced::Element;
 use iced::Length;
 use iced::{Alignment, Application, Command};
+use pleco::Board;
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -13,7 +14,8 @@ pub enum Message {
 }
 
 pub struct App {
-    board: ChessBoard,
+    game: Board,
+    black_at_bottom: bool,
 }
 
 impl Application for App {
@@ -25,7 +27,8 @@ impl Application for App {
     fn new(_flags: ()) -> (Self, Command<Message>) {
         (
             Self {
-                board: ChessBoard::new(400u16),
+                game: Board::default(),
+                black_at_bottom: false,
             },
             Command::none(),
         )
@@ -38,7 +41,7 @@ impl Application for App {
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
             Message::ToggleBoardOrientation => {
-                self.board.toggle_orientation();
+                self.black_at_bottom = ! self.black_at_bottom;
                 Command::none()
             }
         }
@@ -52,6 +55,9 @@ impl Application for App {
         let toggle_board_image = svg(toggle_board_handle)
             .width(Length::Fill)
             .height(Length::Fill);
+        let mut board = ChessBoard::new(400u16);
+        board.set_game(self.game.clone());
+        board.set_orientation(self.black_at_bottom);
         container(
             Column::new()
                 .align_items(Alignment::Center)
@@ -62,7 +68,7 @@ impl Application for App {
                         .height(40)
                         .on_press(Message::ToggleBoardOrientation),
                 )
-                .push(self.board.clone()),
+                .push(board),
         )
         .width(Length::Fill)
         .height(Length::Fill)
